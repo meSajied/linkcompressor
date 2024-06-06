@@ -10,6 +10,10 @@ import java.util.Random;
 
 @Component
 public class UrlShortener {
+  /**
+   * HashMap is used as the time complexity to insert and access data
+   * in the map is O(1)
+   */
   private HashMap<String, String> urlMapping = new HashMap<>();
   private HashMap<String, String> reverseUrlMapping = new HashMap<>();
 
@@ -54,6 +58,15 @@ public class UrlShortener {
 
     return baseURL + "/" + str;
   }
+
+  /**
+   * start from 48 to 97 where 48 is 0 and 97 is Z respectfully.
+   * this function filer 0-9, a-z and A-Z and exclude symbols
+   * like (,), [.
+   * 
+   * @param length
+   * @return unique string og 6 characters
+   */
 
   private String generateRandomStringOfLength(int length) {
     int leftLimit = 48;
