@@ -1,8 +1,7 @@
 package com.example.urlshortener;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.urlvalidator.UrlValidator;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
@@ -11,8 +10,10 @@ import java.util.Random;
 
 @Component
 public class UrlShortener {
-  private HashMap<String, String> UrlToShortUrlMapping = new HashMap<>();
-  private HashMap<String, String> ShortUrlToUrlMapping = new HashMap<>();
+  private HashMap<String, String> urlMapping = new HashMap<>();
+  private HashMap<String, String> reverseUrlMapping = new HashMap<>();
+
+  private int stringLength = 6;
 
   public String shortenUrl(String url) {
     UrlValidator urlValidator = new UrlValidator();
@@ -21,26 +22,37 @@ public class UrlShortener {
       return "Invalid URL";
     }
 
-    if (ShortUrlToUrlMapping.containsKey(url)) {
-      return "already shortened";
+    if (reverseUrlMapping.containsKey(url)) {
+      return shortUrlIncluding(reverseUrlMapping.get(url));
     }
 
-    String uniqueString = generateRandomStringOfLength(6);
+    int CHARACTER_PERMUTATIONS = 62;
+    long URL_BUCKET_SIZE = (long)Math.pow(CHARACTER_PERMUTATIONS, stringLength);
 
-    while(UrlToShortUrlMapping.get(uniqueString) != null) {
-      uniqueString = generateRandomStringOfLength(6);
+    if(URL_BUCKET_SIZE == urlMapping.size()) {
+      return "Can not add more url";
+    }
+    String uniqueString = generateRandomStringOfLength(stringLength);
+
+    while(urlMapping.get(uniqueString) != null) {
+      uniqueString = generateRandomStringOfLength(stringLength);
     }
 
-    URI baseURL = ServletUriComponentsBuilder.fromCurrentContextPath()
+    urlMapping.put(uniqueString, url);
+    reverseUrlMapping.put(url, uniqueString);
+
+    String shortUrl = shortUrlIncluding(uniqueString);
+
+    return shortUrl;
+  }
+
+  private String shortUrlIncluding(String str) {
+    URI baseURL = ServletUriComponentsBuilder
+        .fromCurrentContextPath()
         .build()
         .toUri();
 
-    String shortUrl = baseURL + "/" + uniqueString;
-
-    UrlToShortUrlMapping.put(shortUrl, url);
-    ShortUrlToUrlMapping.put(url, shortUrl);
-
-    return shortUrl;
+    return baseURL + "/" + str;
   }
 
   private String generateRandomStringOfLength(int length) {
@@ -54,5 +66,9 @@ public class UrlShortener {
         .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
         .toString();
     return generatedString;
+  }
+
+  public String getUrl(String shortUrl) {
+    return urlMapping.get(shortUrl);
   }
 }

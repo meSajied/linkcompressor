@@ -1,11 +1,11 @@
-package com.example.urlshortener;
+package com.example.urlvalidator;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 
-class UrlValidator {
-  boolean isValid(String url) {
+public class UrlValidator {
+  public boolean isValid(String url) {
     return tryValidateUrl(url);
   }
 
@@ -13,6 +13,7 @@ class UrlValidator {
     if (url == null || url.isEmpty()) {
       return false;
     }
+
     try {
       new URL(url).toURI();
       return true;

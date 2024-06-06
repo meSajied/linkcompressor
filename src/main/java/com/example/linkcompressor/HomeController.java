@@ -1,30 +1,35 @@
 package com.example.linkcompressor;
 
 import com.example.urlshortener.UrlShortener;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.view.RedirectView;
 
 @Controller
 public class HomeController {
   @Autowired
   private UrlShortener urlShortener;
 
-  @GetMapping("/home")
+  @RequestMapping("/")
   public String home() {
     return "home";
   }
 
-  @GetMapping("/:short-url")
-  public void retriveToUrl() {
-
+  @PostMapping("/")
+  public String shortenUrl(@RequestParam String url, Model model) {
+    String shortUrl = urlShortener.shortenUrl(url);
+    model.addAttribute("shortUrl", shortUrl);
+    return "home";
   }
 
-  @PostMapping("/shorten-url")
-  public void shortenUrl(@RequestParam String url) {
-    String shortUrl = urlShortener.shortenUrl(url);
-    System.out.println(shortUrl);
+  @GetMapping("/{short-url}")
+  public RedirectView redirectToUrl(@PathVariable("short-url") String shortUrl) {
+    String url = urlShortener.getUrl(shortUrl);
+    RedirectView r = new RedirectView(url);
+    r.setUrl(url);
+    return r;
   }
 }
